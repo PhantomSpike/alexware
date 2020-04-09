@@ -1,0 +1,23 @@
+sw_th_ms = 0.42;
+ix_inh = results.spike_width_ms<sw_th_ms;
+ix_ex = not(ix_inh);
+figure;
+hold on;
+plot(good_wfs(ix_inh,:)','b');
+plot(good_wfs(ix_ex,:)','r');
+figure;
+hold on;
+plot(median(good_wfs(ix_inh,:)),'b');
+plot(median(good_wfs(ix_ex,:)),'r');
+%% Same but for width_hh_trough_ms 
+th_ms = 0.47;
+ix_inh = results.spike_width_ms<th_ms;
+ix_ex = not(ix_inh);
+figure;
+hold on;
+plot(good_wfs(ix_inh,:)','b');
+plot(good_wfs(ix_ex,:)','r');
+figure;
+hold on;
+plot(median(good_wfs(ix_inh,:)),'b');
+plot(median(good_wfs(ix_ex,:)),'r');

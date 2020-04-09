@@ -1,0 +1,21 @@
+% function ch_sp_rate = compare_psth(data_root,start_time,end_time)
+data_root = '/data/alex/Data/PSTH_test/P01-repeated-noise-6';
+start_time = 10;
+end_time = 133;
+fs = 30000;
+total_chan = 384;
+[spikeTimes,synch_ch] = get_spikes(data_root,start_time,end_time);
+
+start_times_samples = 
+
+diff_sig = diff(synch_ch);
+
+%Find the sample no for the beginning and end of each sweep
+start_ix = find(diff_sig==1);
+
+stimulus_period_ms = .25;
+stimulus_period_samples = stimulus_period_ms * fs;
+
+n_cycles = 140;
+stimulus_offset_samples = [0:n_cycles-1]*stimulus_period_samples;
+

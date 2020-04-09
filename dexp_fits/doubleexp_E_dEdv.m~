@@ -1,0 +1,33 @@
+function [E,dEdv] = doubleexp_E_dEdv(params,h,k_h)
+
+%Get variables
+A = abs(params.A);
+B = abs(params.B);
+alpha = abs(params.alpha);
+beta = abs(params.beta);
+
+h = h(:); k_h = k_h(:); %Force col vectors
+h_max = length(h);
+%Mean squared error
+exp_pos = exp(-h/alpha);
+exp_neg = exp(-h/beta);
+k_h_fit = A.*exp_pos - B.*exp_neg;
+
+D = k_h_fit-k_h; %Find the difference between the two
+E = (1/h_max)*(D'*D); %Compute the MSE
+
+
+%Partial derivatives
+% dMSE_dA = 2.*sum(D.*exp_pos).*sign(A);
+% dMSE_dB = -2.*sum(D.*exp_neg).*sign(B);
+% dMSE_dalpha = 2.*sum(D.*abs(A).*exp_pos.*h).*sign(alpha)/(abs(alpha).^2);
+% dMSE_dbeta = -2.*sum(D.*abs(B).*exp_neg.*h).*sign(beta)/(abs(beta).^2);
+
+dE_dA = (2/h_max)*(D'*exp_pos);
+dE_dB = (-2/h_max)*(D'*exp_neg);
+dE_dalpha = (2/h_max)*(A/alpha^2)*(D'*(exp_pos.*h));
+dE_dbeta = (-2/h_max)*(B/beta^2)*(D'*(exp_neg.*h));
+
+dEdv = [dE_dA; dE_dB; dE_dalpha; dE_dbeta];
+
+

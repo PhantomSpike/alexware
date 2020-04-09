@@ -1,0 +1,47 @@
+function sahani_psth = psth_sahani(Y,start_time_ms,grid_root)
+%function spike_times = getpsth(Y)
+%This function will generate a psth for every channel that is found in the
+%spike times file. For each channel it will generate a structure array. In
+%this structure array there will be 6 more cell arrays, one for each
+%of the 6 different stimuli (01, 02, 11, 12, 21 ,22). In each structure
+%array, each row will be one repeat/trial/sweep and there will be 10 rows for the
+%10 different repeats. Each file is 40sec and we want binning of 5ms so we
+%need 8,000 columns in these matrices.
+%Y has the following structure:
+% Y - [spike absolute time - spike relative times - unit - stimulus # - repeat # - sweep #]
+
+%% Initial parameters
+t_bin_ms = 5; %The length of one time bin in ms
+sweep_duration_s = 34; %The duration of each stimulus file in s
+sweep_duration_ms = sweep_duration_s*1000; %Convert to ms
+no_conds = 6; %The number of sound stimuli
+no_repeats = 10; %The number of repeats for each echoic condition
+num_stim = no_conds*no_repeats; %Find the total number of stimuli
+psth_start_time_ms = 300; %The time in ms we want to remove from the PSTH due to the tensorizing and zero padding
+psth_start_bin = psth_start_time_ms/t_bin_ms; %The starting bin for the PSTH 
+edges_ms = [0:t_bin_ms:sweep_duration_ms]; %The edges of the histogram
+%% Get PSTHs
+spike_times_ms = Y(:,1).*1000; % Get the spike times in ms
+clusters = Y(:,2);
+ix_clusters = unique(clusters); %Find all the units in the input file
+no_clusters = length(ix_clusters);
+
+dir_info = dir([grid_root '/*Info.mat']); %Get the names of all files with this extension
+grid_filename = fullfile(dir_info.folder, dir_info.name); %Form the name of the file to be opened
+load(grid_filename);
+
+for cluster = 1:no_clusters
+    fprintf('== Processing cluster %.0f/%.0f ==\n',cluster,no_clusters);
+    cluster_id = ix_clusters(cluster); %Load the current unit
+    for stim = 1:num_stim
+        ix_stim = find(grid.randomisedGridSetIdx==stim); %Find the stimulus ix that corresponds to this current stimulus
+        ix_stim_ms = start_ix_ms(ix_stim); %Find the starting point for this stimulus
+        psth(cluster).data(stim,:) = histc(spike_times_ms(clusters == cluster_id),ix_stim_ms + edges_ms);
+        psth(cluster).cluster_id = clusre_id;
+    end
+    psth(cluster).data = psth(cluster).data(:,psth_start_bin:end-1); %Delete the bins corresponding to zero padded ime point from the cochleagram and the last bin which is always weird
+    sz_psth = size(psth(cluster).data,2;)
+    psth(cluster).data = reshape(psth(cluster).data,no_repeats,no_conds*);
+end
+
+end
